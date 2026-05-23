@@ -175,7 +175,7 @@ export const EVENT_LOCALE_EN: Record<string, {
       },
     ],
   },
-  brief_ruubio: {
+  brief_rubbio: {
     source: '✉️ Murdo Rubbio Briefing',
     title: 'Critical Minerals Decoupling & Supply Chain Risk Alert',
     body: '"Mr. President, intelligence indicates several core member states plan to sign the Asia-Pacific Critical Minerals Joint Guarantee Agreement this afternoon, attempting to bypass our rare-earth pricing system. Here is the emergency response plan."',

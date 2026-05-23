@@ -218,7 +218,7 @@ export const INTERRUPT_EVENTS: InterruptEvent[] = [
     ],
   },
   {
-    id: 'brief_ruubio',
+    id: 'brief_rubbio',
     source: '✉️ Murdo Rubbio 简报',
     title: '关键矿产脱钩与供应链风险提示',
     body: '"总统先生，情报显示几个核心成员国计划在下午签署《亚太关键矿产联合保障协定》，试图绕开我们的稀有金属定价体系。这是紧急应对方案。"',
@@ -245,7 +245,7 @@ export const INTERRUPT_EVENTS: InterruptEvent[] = [
     id: 'brief_wangz',
     source: '✉️ D.J Wangz 简报',
     title: '铁锈地带制造业回流与碳税对冲机制',
-    body: '"老板，五大湖区的钢铁工人群体发来联名信，强烈要求我们在 APEC 峰会上对所有不符合我们环保标准的进口钢材课征\'反向对冲碳税\'。"',
+    body: '"总统，五大湖区的钢铁工人群体发来联名信，强烈要求我们在 APEC 峰会上对所有不符合我们环保标准的进口钢材课征\'反向对冲碳税\'。"',
     options: [
       {
         label: '接听（全面采纳，稳固核心基本盘）',
