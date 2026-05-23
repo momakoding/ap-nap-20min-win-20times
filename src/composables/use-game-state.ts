@@ -5,7 +5,7 @@ import {
   GAME_DURATION_REAL_SECONDS,
   INTERRUPT_COUNT, INTERRUPT_DECISION_SECONDS,
   STRESS_HEALTH_DRAIN_THRESHOLD,
-  ACTION_REPEAT_DECAY,
+  ACTION_REPEAT_MULTIPLIER, ACTION_MAX_CONSECUTIVE,
   EVENT_LOCALE_EN, ACTION_LOCALE_EN,
 } from '@/contents/game-data'
 import { INTERRUPT_EVENTS } from '@/contents/game-data'
@@ -27,9 +27,10 @@ export function useGameState() {
   const busyAction = ref<HealthAction | null>(null)
   const busyTimeLeft = ref(0)
 
-  // ---- 行动历史 & 使用次数追踪 ----
+  // ---- 行动历史 & 连续重复追踪 ----
   const actionFeedbackList = ref<ActionRecord[]>([])
-  const actionUseCount = ref<Record<string, number>>({})
+  const streakActionId  = ref<string | null>(null)  // 最近完成的行动 id
+  const streakCount     = ref(0)                    // 该行动连续完成次数
   let actionFeedbackIdCounter = 0
   let currentActionMultiplier = 1
 
@@ -172,9 +173,14 @@ export function useGameState() {
   // ---- 健康行动 ----
   function executeAction(action: HealthAction) {
     if (phase.value !== 'playing' || isBusy.value) return
-    const count = actionUseCount.value[action.id] ?? 0
-    currentActionMultiplier = 1 / (1 + count * ACTION_REPEAT_DECAY)
-    actionUseCount.value[action.id] = count + 1
+    if (action.id === streakActionId.value && streakCount.value >= ACTION_MAX_CONSECUTIVE) return
+    currentActionMultiplier = action.id === streakActionId.value ? ACTION_REPEAT_MULTIPLIER : 1
+    if (action.id === streakActionId.value) {
+      streakCount.value++
+    } else {
+      streakActionId.value = action.id
+      streakCount.value = 1
+    }
 
     isBusy.value = true
     busyAction.value = action
@@ -239,7 +245,8 @@ export function useGameState() {
     timeLeft.value = GAME_DURATION_REAL_SECONDS
     actionFeedbackList.value = []
     actionFeedbackIdCounter = 0
-    actionUseCount.value = {}
+    streakActionId.value = null
+    streakCount.value = 0
     currentActionMultiplier = 1
     ending.value = null
     handledInterrupts.value = 0
@@ -291,7 +298,8 @@ export function useGameState() {
     timeLeft: readonly(timeLeft),
     gameTimeLeft,
     actionFeedbackList,
-    actionUseCount,
+    streakActionId: readonly(streakActionId),
+    streakCount: readonly(streakCount),
     isBusy: readonly(isBusy),
     busyAction: readonly(busyAction),
     busyTimeLeft: readonly(busyTimeLeft),

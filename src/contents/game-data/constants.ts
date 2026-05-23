@@ -18,8 +18,9 @@ export const STAT_CAPS = {
   stress:    { min: 0, max: 100 },
 } as const
 
-// ---- 行动重复衰减 ----
-export const ACTION_REPEAT_DECAY = 0.5   // multiplier = 1 / (1 + useCount * DECAY)
+// ---- 行动连续重复惩罚 ----
+export const ACTION_REPEAT_MULTIPLIER = 0.5  // 连续第2次使用的效果倍率
+export const ACTION_MAX_CONSECUTIVE   = 2    // 连续使用上限（超出后锁定直到完成其他行动）
 
 // ---- 特殊结局阈值 ----
 export const ENDING_THRESHOLDS = {

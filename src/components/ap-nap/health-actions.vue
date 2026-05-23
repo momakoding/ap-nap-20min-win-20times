@@ -7,19 +7,19 @@
         :key="action.id"
         class="health-actions__btn"
         :class="{
-          'health-actions__btn--active':   busyAction?.id === action.id,
-          'health-actions__btn--disabled': isBusy && busyAction?.id !== action.id,
-          'health-actions__btn--penalty':  !isBusy && (actionUseCount[action.id] ?? 0) > 0,
+          'health-actions__btn--active':    busyAction?.id === action.id,
+          'health-actions__btn--disabled':  isBusy && busyAction?.id !== action.id,
+          'health-actions__btn--used-once': !isBusy && action.id === streakActionId && streakCount === 1,
+          'health-actions__btn--exhausted': action.id === streakActionId && streakCount >= 2,
         }"
-        :disabled="isBusy"
+        :disabled="isBusy || (action.id === streakActionId && streakCount >= 2)"
         :title="lang === 'en' ? (ACTION_LOCALE_EN[action.id]?.tooltip ?? action.tooltip) : action.tooltip"
         @click="$emit('execute', action)"
       >
         <div class="health-actions__name-row">
           <span class="health-actions__name">{{ lang === 'en' ? (ACTION_LOCALE_EN[action.id]?.name ?? action.name) : action.name }}</span>
-          <span v-if="(actionUseCount[action.id] ?? 0) > 0" class="health-actions__penalty-badge">
-            ×{{ Math.round(100 / (1 + (actionUseCount[action.id] ?? 0) * 0.5)) }}%
-          </span>
+          <span v-if="action.id === streakActionId && streakCount === 1" class="health-actions__half-badge">×½</span>
+          <span v-if="action.id === streakActionId && streakCount >= 2" class="health-actions__lock-badge">🔒</span>
         </div>
         <span class="health-actions__meta">
           +{{ action.healthGain }} ❤️ &nbsp;·&nbsp;
@@ -62,7 +62,8 @@ defineProps<{
   isBusy: boolean
   busyAction: HealthAction | null
   busyTimeLeft: number
-  actionUseCount: Record<string, number>
+  streakActionId: string | null
+  streakCount: number
 }>()
 
 defineEmits<{
@@ -105,12 +106,20 @@ const { lang } = useLocale()
   @apply text-sm font-medium text-text-primary;
 }
 
-.health-actions__penalty-badge {
-  @apply rounded px-1 text-xs font-bold bg-accent/15 text-accent-light;
+.health-actions__half-badge {
+  @apply rounded px-1 text-xs font-bold bg-accent/20 text-accent-light;
 }
 
-.health-actions__btn--penalty {
-  @apply border-accent/30;
+.health-actions__lock-badge {
+  @apply text-xs opacity-60;
+}
+
+.health-actions__btn--used-once {
+  @apply border-accent/40;
+}
+
+.health-actions__btn--exhausted {
+  @apply cursor-not-allowed opacity-40;
 }
 
 .health-actions__meta {
