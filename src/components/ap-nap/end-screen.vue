@@ -29,6 +29,29 @@
         </div>
       </div>
 
+      <!-- 选择记录 -->
+      <div v-if="choiceHistory.length" class="end-screen__log">
+        <h3 class="end-screen__log-title">
+          {{ lang === 'en' ? 'Choice Log' : '选择记录' }}
+        </h3>
+        <div class="end-screen__log-list">
+          <div
+            v-for="record in choiceHistory"
+            :key="record.id"
+            class="end-screen__log-item"
+          >
+            <div class="end-screen__log-meta">
+              <span :class="`end-screen__log-tag end-screen__log-tag--${['a','b','c'][record.optionIndex]}`">
+                {{ ['A','B','C'][record.optionIndex] }}
+              </span>
+              <span class="end-screen__log-source">{{ record.eventSource }}</span>
+              <span class="end-screen__log-time">{{ record.gameTime }}</span>
+            </div>
+            <p class="end-screen__log-reply">{{ record.reply }}</p>
+          </div>
+        </div>
+      </div>
+
       <div class="end-screen__actions">
         <button class="end-screen__btn end-screen__btn--restart" @click="$emit('restart')">
           {{ lang === 'en' ? 'Win Again' : '再赢一次' }}
@@ -42,13 +65,14 @@
 </template>
 
 <script setup lang="ts">
-import type { GameStats, GameEnding } from '@/contents/game-data'
+import type { GameStats, GameEnding, ChoiceRecord } from '@/contents/game-data'
 import { useLocale } from '@/composables'
 
 defineProps<{
   ending: GameEnding
   stats: GameStats
   handledInterrupts: number
+  choiceHistory: ChoiceRecord[]
 }>()
 
 defineEmits<{
@@ -66,7 +90,8 @@ const { lang } = useLocale()
 }
 
 .end-screen__box {
-  @apply mx-4 w-full max-w-lg rounded-2xl border border-border-subtle bg-bg-surface p-8 shadow-2xl;
+  @apply mx-4 w-full max-w-lg rounded-2xl border border-border-subtle bg-bg-surface p-8 shadow-2xl
+         max-h-[90vh] overflow-y-auto;
 }
 
 .end-screen__box--special {
@@ -103,6 +128,46 @@ const { lang } = useLocale()
 
 .end-screen__stat-val--win {
   @apply text-accent-light;
+}
+
+.end-screen__log {
+  @apply mb-6;
+}
+
+.end-screen__log-title {
+  @apply mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted;
+}
+
+.end-screen__log-list {
+  @apply flex max-h-52 flex-col gap-2 overflow-y-auto pr-1;
+}
+
+.end-screen__log-item {
+  @apply rounded-lg bg-bg-overlay px-3 py-2;
+}
+
+.end-screen__log-meta {
+  @apply mb-1 flex items-center gap-2;
+}
+
+.end-screen__log-tag {
+  @apply flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold;
+}
+
+.end-screen__log-tag--a { @apply bg-success/20 text-success-light; }
+.end-screen__log-tag--b { @apply bg-danger/20 text-danger-light; }
+.end-screen__log-tag--c { @apply bg-accent/20 text-accent-light; }
+
+.end-screen__log-source {
+  @apply flex-1 truncate text-xs text-text-secondary;
+}
+
+.end-screen__log-time {
+  @apply font-mono text-xs text-text-muted;
+}
+
+.end-screen__log-reply {
+  @apply text-xs leading-relaxed text-text-muted italic;
 }
 
 .end-screen__actions {
