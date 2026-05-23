@@ -42,6 +42,29 @@ export interface HealthAction {
 // ---- 游戏状态机 ----
 export type GamePhase = 'playing' | 'interrupted' | 'ended'
 
+// ---- 行动记录 ----
+export interface ActionRecord {
+  id: number
+  actionName: string
+  text: string           // 完成时为 tooltip，被打断时为提示文字
+  gameTime: string
+  interrupted: boolean
+  multiplier: number     // 1 = 全效，0.5 = 减半
+}
+
+// ---- 选择记录 ----
+export interface ChoiceRecord {
+  id: number
+  eventSource: string
+  eventTitle: string
+  optionIndex: 0 | 1 | 2
+  optionLabel: string
+  reply: string
+  gameTime: string        // 选择时刻的游戏内时钟，如 "17:30"
+  decisionElapsed: number // 玩家决策耗时（秒）
+  deltas: OptionDeltas
+}
+
 // ---- 结局 ----
 export interface GameEnding {
   title: string
