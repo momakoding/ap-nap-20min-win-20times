@@ -1,8 +1,6 @@
 // ---- 游戏时间设定 ----
 export const GAME_DURATION_REAL_SECONDS = 120
-export const INTERRUPT_INTERVAL_NORMAL = 15      // 常规打断间隔（秒）
-export const INTERRUPT_INTERVAL_FAST = 8         // 高压力时打断间隔（秒）
-export const STRESS_FAST_THRESHOLD = 70          // 超过此值触发快速打断
+export const INTERRUPT_COUNT = 12                // 每局固定触发的打断事件数
 export const INTERRUPT_DECISION_SECONDS = 8      // 玩家决策时间
 export const STRESS_HEALTH_DRAIN_THRESHOLD = 70  // 压力超此值时健康值被动扣减
 

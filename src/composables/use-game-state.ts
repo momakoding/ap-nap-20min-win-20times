@@ -3,8 +3,7 @@ import type { GameStats, GamePhase, HealthAction, InterruptEvent, GameEnding } f
 import {
   INITIAL_STATS, STAT_CAPS,
   GAME_DURATION_REAL_SECONDS,
-  INTERRUPT_INTERVAL_NORMAL, INTERRUPT_INTERVAL_FAST,
-  STRESS_FAST_THRESHOLD, INTERRUPT_DECISION_SECONDS,
+  INTERRUPT_COUNT, INTERRUPT_DECISION_SECONDS,
   STRESS_HEALTH_DRAIN_THRESHOLD,
   EVENT_LOCALE_EN, ACTION_LOCALE_EN,
 } from '@/contents/game-data'
@@ -38,9 +37,20 @@ export function useGameState() {
 
   // ---- 计时器句柄 ----
   let mainTimer: ReturnType<typeof setInterval> | null = null
-  let interruptTimer: ReturnType<typeof setInterval> | null = null
   let decisionTimer: ReturnType<typeof setInterval> | null = null
   let busyTimer: ReturnType<typeof setInterval> | null = null
+
+  // ---- 事件触发检查点（timeLeft 阈值，从大到小，pop 消费）----
+  let triggerPoints: number[] = []
+
+  function buildTriggerPoints(): number[] {
+    // 12个触发点，均匀分布：首个在5秒后（timeLeft=115），末个在5秒前（timeLeft=5）
+    const first = GAME_DURATION_REAL_SECONDS - 5
+    const last = 5
+    const step = (first - last) / (INTERRUPT_COUNT - 1)
+    return Array.from({ length: INTERRUPT_COUNT }, (_, i) => Math.round(first - i * step))
+      .sort((a, b) => a - b) // 升序存储，pop 从最大值开始消费
+  }
 
   // ---- 事件队列（随机洗牌后循环使用）----
   let eventQueue: InterruptEvent[] = []
@@ -89,26 +99,13 @@ export function useGameState() {
 
   // ---- 计时器清理 ----
   function clearAllTimers() {
-    if (mainTimer)      { clearInterval(mainTimer);      mainTimer = null }
-    if (interruptTimer) { clearInterval(interruptTimer); interruptTimer = null }
-    if (decisionTimer)  { clearInterval(decisionTimer);  decisionTimer = null }
-    if (busyTimer)      { clearInterval(busyTimer);       busyTimer = null }
-  }
-
-  // ---- 打断事件调度 ----
-  function scheduleInterrupt() {
-    if (interruptTimer) clearInterval(interruptTimer)
-    const interval = stats.value.stress > STRESS_FAST_THRESHOLD
-      ? INTERRUPT_INTERVAL_FAST
-      : INTERRUPT_INTERVAL_NORMAL
-    interruptTimer = setInterval(() => {
-      if (phase.value !== 'playing') return
-      showInterruptEvent()
-    }, interval * 1000)
+    if (mainTimer)     { clearInterval(mainTimer);     mainTimer = null }
+    if (decisionTimer) { clearInterval(decisionTimer); decisionTimer = null }
+    if (busyTimer)     { clearInterval(busyTimer);     busyTimer = null }
   }
 
   function showInterruptEvent() {
-    if (isBusy.value) cancelBusyAction()
+    if (isBusy.value) cancelBusyAction(true)
     currentEvent.value = nextEvent()
     phase.value = 'interrupted'
     decisionTimeLeft.value = INTERRUPT_DECISION_SECONDS
@@ -140,8 +137,6 @@ export function useGameState() {
 
     if (checkInstantDeath()) return
     if (timeLeft.value <= 0) { finalizeGame(); return }
-
-    scheduleInterrupt()
   }
 
   // ---- 健康行动 ----
@@ -187,6 +182,7 @@ export function useGameState() {
     busyAction.value = null
     currentEvent.value = null
     refillQueue()
+    triggerPoints = buildTriggerPoints()
     phase.value = 'playing'
 
     // 主计时器：决策期间暂停倒计时
@@ -198,10 +194,14 @@ export function useGameState() {
         if (checkInstantDeath()) return
       }
       timeLeft.value--
+      // 检查点触发：timeLeft 降到阈值时弹出事件
+      if (triggerPoints.length > 0 && timeLeft.value <= triggerPoints[triggerPoints.length - 1]) {
+        triggerPoints.pop()
+        showInterruptEvent()
+        return
+      }
       if (timeLeft.value <= 0) finalizeGame()
     }, 1000)
-
-    scheduleInterrupt()
   }
 
   function restartGame() {
