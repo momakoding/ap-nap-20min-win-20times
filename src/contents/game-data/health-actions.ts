@@ -1,0 +1,68 @@
+import type { HealthAction } from './types'
+
+export const HEALTH_ACTIONS: HealthAction[] = [
+  {
+    id: 'mcdonalds',
+    name: '炫口麦当劳金拱门',
+    realSeconds: 30,
+    healthGain: 30,
+    stressDelta: 10,
+    tooltip: '补充高盐高脂的快乐能量，高呼：没人比我更懂优质蛋白质！',
+  },
+  {
+    id: 'golf',
+    name: '高尔夫挥杆拉伸',
+    realSeconds: 18,
+    healthGain: 18,
+    stressDelta: -5,
+    tooltip: '在休息室里无球挥杆，舒展腰椎，假装自己正置身于佛州阳光沙滩。',
+  },
+  {
+    id: 'punch',
+    name: '对空气打军体拳',
+    realSeconds: 9,
+    healthGain: 10,
+    stressDelta: -10,
+    tooltip: '狂暴挥拳，宣泄情绪，用强有力的核心力量证明自己还能再干八年。',
+  },
+  {
+    id: 'tan',
+    name: '美黑喷雾补色',
+    realSeconds: 12,
+    healthGain: 5,
+    stressDelta: -15,
+    tooltip: '闭上双眼，享受充满商务气息的橙色喷雾，重新找回健康的肤色自信。',
+  },
+  {
+    id: 'cola',
+    name: '猛吸大号无糖可乐',
+    realSeconds: 6,
+    healthGain: 8,
+    stressDelta: -2,
+    tooltip: '冰凉的液体刺激食道，用零卡路里的名义掩饰对多边贸易的焦虑。',
+  },
+  {
+    id: 'hair',
+    name: '整理招牌假发型',
+    realSeconds: 3,
+    healthGain: 4,
+    stressDelta: -5,
+    tooltip: '面对镜子仔细固发，确保标志性的金发在下午的全体会议上坚不可摧。',
+  },
+  {
+    id: 'xweet',
+    name: '密室狂发喳特宣泄',
+    realSeconds: 12,
+    healthGain: 12,
+    stressDelta: -25,
+    tooltip: '疯狂敲击屏幕，把所有批判多边主义的废话发出去，念头瞬间通达。',
+  },
+  {
+    id: 'pill',
+    name: '吞服神秘大力补丸',
+    realSeconds: 6,
+    healthGain: 15,
+    stressDelta: 0,
+    tooltip: '配合温水吞下定制维他命，用高科技生物学强行维持懂氏神话。',
+  },
+]
