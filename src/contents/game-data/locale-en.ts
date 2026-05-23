@@ -235,7 +235,7 @@ export const EVENT_LOCALE_EN: Record<string, {
 }
 
 export const ACTION_LOCALE_EN: Record<string, { name: string; tooltip: string }> = {
-  mcdonalds: {
+  bugger_queens: {
     name: "Bugger Queen's Royal Bee Burger Feast",
     tooltip: "Fuel up on glorious high-salt, high-fat energy! Nobody knows Bugger Queen's royal quality protein better than me!",
   },

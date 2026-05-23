@@ -2,7 +2,7 @@ import type { HealthAction } from './types'
 
 export const HEALTH_ACTIONS: HealthAction[] = [
   {
-    id: 'mcdonalds',
+    id: 'bugger_queens',
     name: '炫口女王蜂汉堡',
     realSeconds: 15,
     healthGain: 20,
