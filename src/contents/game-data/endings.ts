@@ -28,8 +28,13 @@ export const INSTANT_DEATH_ENDINGS: Record<string, GameEnding> = {
 }
 
 // ---- 特殊隐藏结局 ----
-export function resolveSpecialEnding(_stats: GameStats, handledInterrupts: number): GameEnding | null {
-  if (handledInterrupts >= ENDING_THRESHOLDS.WIN_ALL_INTERRUPTS) {
+export function resolveSpecialEnding(stats: GameStats, handledInterrupts: number): GameEnding | null {
+  if (
+    handledInterrupts >= ENDING_THRESHOLDS.WIN_ALL_INTERRUPTS &&
+    stats.diplomacy  >= ENDING_THRESHOLDS.WIN_MIN_DIPLOMACY   &&
+    stats.stress     <= ENDING_THRESHOLDS.WIN_MAX_STRESS       &&
+    stats.health     >= ENDING_THRESHOLDS.WIN_MIN_HEALTH
+  ) {
     return {
       title: '20分钟赢了20次：终极赢圣（20 Min, Win 20 Times）',
       titleEn: ENDING_LOCALE_EN.special.title,
