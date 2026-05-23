@@ -18,7 +18,13 @@ export const STAT_CAPS = {
   stress:    { min: 0, max: 100 },
 } as const
 
+// ---- 行动重复衰减 ----
+export const ACTION_REPEAT_DECAY = 0.5   // multiplier = 1 / (1 + useCount * DECAY)
+
 // ---- 特殊结局阈值 ----
 export const ENDING_THRESHOLDS = {
   WIN_ALL_INTERRUPTS: 12, // 处理完全部12个打断事件
+  WIN_MIN_DIPLOMACY:  50, // 外交声誉下限
+  WIN_MAX_STRESS:     79, // 压力值上限（全defer=81，恰好卡掉）
+  WIN_MIN_HEALTH:     25, // 健康值下限
 } as const

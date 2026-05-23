@@ -7,14 +7,20 @@
         :key="action.id"
         class="health-actions__btn"
         :class="{
-          'health-actions__btn--active': busyAction?.id === action.id,
+          'health-actions__btn--active':   busyAction?.id === action.id,
           'health-actions__btn--disabled': isBusy && busyAction?.id !== action.id,
+          'health-actions__btn--penalty':  !isBusy && (actionUseCount[action.id] ?? 0) > 0,
         }"
         :disabled="isBusy"
         :title="lang === 'en' ? (ACTION_LOCALE_EN[action.id]?.tooltip ?? action.tooltip) : action.tooltip"
         @click="$emit('execute', action)"
       >
-        <span class="health-actions__name">{{ lang === 'en' ? (ACTION_LOCALE_EN[action.id]?.name ?? action.name) : action.name }}</span>
+        <div class="health-actions__name-row">
+          <span class="health-actions__name">{{ lang === 'en' ? (ACTION_LOCALE_EN[action.id]?.name ?? action.name) : action.name }}</span>
+          <span v-if="(actionUseCount[action.id] ?? 0) > 0" class="health-actions__penalty-badge">
+            ×{{ Math.round(100 / (1 + (actionUseCount[action.id] ?? 0) * 0.5)) }}%
+          </span>
+        </div>
         <span class="health-actions__meta">
           +{{ action.healthGain }} ❤️ &nbsp;·&nbsp;
           <span :class="action.stressDelta < 0 ? 'health-actions__stress--down' : 'health-actions__stress--up'">
@@ -35,13 +41,15 @@
       </button>
     </div>
 
-    <!-- 当前行动反馈 -->
-    <Transition name="fade-up">
-      <div v-if="busyAction" class="health-actions__feedback">
-        <span class="health-actions__feedback-label">{{ lang === 'en' ? (ACTION_LOCALE_EN[busyAction.id]?.name ?? busyAction.name) : busyAction.name }}</span>
-        <span class="health-actions__feedback-timer">{{ busyTimeLeft }}s</span>
-      </div>
-    </Transition>
+    <!-- 当前行动反馈（固定高度防止跳动） -->
+    <div class="health-actions__feedback-slot">
+      <Transition name="fade-up">
+        <div v-if="busyAction" class="health-actions__feedback">
+          <span class="health-actions__feedback-label">{{ lang === 'en' ? (ACTION_LOCALE_EN[busyAction.id]?.name ?? busyAction.name) : busyAction.name }}</span>
+          <span class="health-actions__feedback-timer">{{ busyTimeLeft }}s</span>
+        </div>
+      </Transition>
+    </div>
   </div>
 </template>
 
@@ -54,6 +62,7 @@ defineProps<{
   isBusy: boolean
   busyAction: HealthAction | null
   busyTimeLeft: number
+  actionUseCount: Record<string, number>
 }>()
 
 defineEmits<{
@@ -88,8 +97,20 @@ const { lang } = useLocale()
   @apply cursor-not-allowed opacity-40;
 }
 
+.health-actions__name-row {
+  @apply flex items-center gap-1.5;
+}
+
 .health-actions__name {
   @apply text-sm font-medium text-text-primary;
+}
+
+.health-actions__penalty-badge {
+  @apply rounded px-1 text-xs font-bold bg-accent/15 text-accent-light;
+}
+
+.health-actions__btn--penalty {
+  @apply border-accent/30;
 }
 
 .health-actions__meta {
@@ -112,8 +133,14 @@ const { lang } = useLocale()
   @apply h-full bg-accent transition-all duration-1000;
 }
 
+.health-actions__feedback-slot {
+  height: 2.25rem;
+  margin-top: 0.5rem;
+  position: relative;
+}
+
 .health-actions__feedback {
-  @apply mt-2 flex items-center justify-between rounded-lg bg-accent/10 px-3 py-1.5 text-sm;
+  @apply absolute inset-0 flex items-center justify-between rounded-lg bg-accent/10 px-3 text-sm;
 }
 
 .health-actions__feedback-label {

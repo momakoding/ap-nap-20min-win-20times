@@ -1,10 +1,11 @@
 import { ref, computed, readonly } from 'vue'
-import type { GameStats, GamePhase, HealthAction, InterruptEvent, GameEnding } from '@/contents/game-data'
+import type { GameStats, GamePhase, HealthAction, InterruptEvent, GameEnding, ChoiceRecord, ActionRecord } from '@/contents/game-data'
 import {
   INITIAL_STATS, STAT_CAPS,
   GAME_DURATION_REAL_SECONDS,
   INTERRUPT_COUNT, INTERRUPT_DECISION_SECONDS,
   STRESS_HEALTH_DRAIN_THRESHOLD,
+  ACTION_REPEAT_DECAY,
   EVENT_LOCALE_EN, ACTION_LOCALE_EN,
 } from '@/contents/game-data'
 import { INTERRUPT_EVENTS } from '@/contents/game-data'
@@ -22,18 +23,26 @@ export function useGameState() {
   const phase = ref<GamePhase>('playing')
   const stats = ref<GameStats>({ ...INITIAL_STATS })
   const timeLeft = ref(GAME_DURATION_REAL_SECONDS)
-  const actionFeedback = ref('')
   const isBusy = ref(false)
   const busyAction = ref<HealthAction | null>(null)
   const busyTimeLeft = ref(0)
 
+  // ---- 行动历史 & 使用次数追踪 ----
+  const actionFeedbackList = ref<ActionRecord[]>([])
+  const actionUseCount = ref<Record<string, number>>({})
+  let actionFeedbackIdCounter = 0
+  let currentActionMultiplier = 1
+
   // ---- 打断事件状态 ----
   const currentEvent = ref<InterruptEvent | null>(null)
   const decisionTimeLeft = ref(0)
+  const decisionElapsed = ref(0)
 
   // ---- 결국 ----
   const ending = ref<GameEnding | null>(null)
   const handledInterrupts = ref(0)
+  const choiceHistory = ref<ChoiceRecord[]>([])
+  let choiceIdCounter = 0
 
   // ---- 计时器句柄 ----
   let mainTimer: ReturnType<typeof setInterval> | null = null
@@ -109,10 +118,12 @@ export function useGameState() {
     currentEvent.value = nextEvent()
     phase.value = 'interrupted'
     decisionTimeLeft.value = INTERRUPT_DECISION_SECONDS
+    decisionElapsed.value = 0
 
     if (decisionTimer) clearInterval(decisionTimer)
     decisionTimer = setInterval(() => {
       decisionTimeLeft.value--
+      decisionElapsed.value++
       if (decisionTimeLeft.value <= 0) {
         clearInterval(decisionTimer!); decisionTimer = null
         chooseOption(2)
@@ -124,13 +135,32 @@ export function useGameState() {
     if (!currentEvent.value) return
     if (decisionTimer) { clearInterval(decisionTimer); decisionTimer = null }
 
-    const option = currentEvent.value.options[optionIndex]
+    const event = currentEvent.value
+    const option = event.options[optionIndex]
+    const enLocale = EVENT_LOCALE_EN[event.id]
     const { health = 0, diplomacy = 0, stress = 0 } = option.deltas
 
     handledInterrupts.value++
     applyDeltas(health, diplomacy, stress)
-    const enReply = EVENT_LOCALE_EN[currentEvent.value.id]?.options[optionIndex]?.reply
-    actionFeedback.value = lang.value === 'en' && enReply ? enReply : option.reply
+
+    const reply = lang.value === 'en' && enLocale?.options[optionIndex]?.reply
+      ? enLocale.options[optionIndex].reply
+      : option.reply
+    const optionLabel = lang.value === 'en' && enLocale?.options[optionIndex]?.label
+      ? enLocale.options[optionIndex].label
+      : option.label
+
+    choiceHistory.value.push({
+      id: ++choiceIdCounter,
+      eventSource: lang.value === 'en' && enLocale?.source ? enLocale.source : event.source,
+      eventTitle: lang.value === 'en' && enLocale?.title ? enLocale.title : event.title,
+      optionIndex,
+      optionLabel,
+      reply,
+      gameTime: gameTimeLeft.value,
+      decisionElapsed: decisionElapsed.value,
+      deltas: { health, diplomacy, stress },
+    })
 
     currentEvent.value = null
     phase.value = 'playing'
@@ -142,6 +172,10 @@ export function useGameState() {
   // ---- 健康行动 ----
   function executeAction(action: HealthAction) {
     if (phase.value !== 'playing' || isBusy.value) return
+    const count = actionUseCount.value[action.id] ?? 0
+    currentActionMultiplier = 1 / (1 + count * ACTION_REPEAT_DECAY)
+    actionUseCount.value[action.id] = count + 1
+
     isBusy.value = true
     busyAction.value = action
     busyTimeLeft.value = action.realSeconds
@@ -158,9 +192,18 @@ export function useGameState() {
   function finishAction(action: HealthAction) {
     isBusy.value = false
     busyAction.value = null
-    applyDeltas(action.healthGain, 0, action.stressDelta)
+    const m = currentActionMultiplier
+    applyDeltas(Math.round(action.healthGain * m), 0, Math.round(action.stressDelta * m))
+    const enName = ACTION_LOCALE_EN[action.id]?.name
     const enTooltip = ACTION_LOCALE_EN[action.id]?.tooltip
-    actionFeedback.value = lang.value === 'en' && enTooltip ? enTooltip : action.tooltip
+    actionFeedbackList.value.push({
+      id: ++actionFeedbackIdCounter,
+      actionName: lang.value === 'en' && enName ? enName : action.name,
+      text: lang.value === 'en' && enTooltip ? enTooltip : action.tooltip,
+      gameTime: gameTimeLeft.value,
+      interrupted: false,
+      multiplier: m,
+    })
     checkInstantDeath()
   }
 
@@ -170,10 +213,20 @@ export function useGameState() {
       const action = busyAction.value
       const elapsed = action.realSeconds - busyTimeLeft.value
       const ratio = elapsed / action.realSeconds
-      // 折半比例：gain * ratio * 0.5，保留挑战性
-      const partialHealth = Math.round(action.healthGain * ratio * 0.5)
-      const partialStress = Math.round(action.stressDelta * ratio * 0.5)
+      const m = currentActionMultiplier
+      const partialHealth = Math.round(action.healthGain * ratio * 0.5 * m)
+      const partialStress = Math.round(action.stressDelta * ratio * 0.5 * m)
       if (partialHealth > 0 || partialStress !== 0) applyDeltas(partialHealth, 0, partialStress)
+      const enName = ACTION_LOCALE_EN[action.id]?.name
+      const name = lang.value === 'en' && enName ? enName : action.name
+      actionFeedbackList.value.push({
+        id: ++actionFeedbackIdCounter,
+        actionName: name,
+        text: lang.value === 'en' ? `(Interrupted) ${name}` : `（被打断）${name}`,
+        gameTime: gameTimeLeft.value,
+        interrupted: true,
+        multiplier: m * 0.5,
+      })
     }
     isBusy.value = false
     busyAction.value = null
@@ -184,9 +237,15 @@ export function useGameState() {
   function startGame() {
     stats.value = { ...INITIAL_STATS }
     timeLeft.value = GAME_DURATION_REAL_SECONDS
-    actionFeedback.value = ''
+    actionFeedbackList.value = []
+    actionFeedbackIdCounter = 0
+    actionUseCount.value = {}
+    currentActionMultiplier = 1
     ending.value = null
     handledInterrupts.value = 0
+    choiceHistory.value = []
+    choiceIdCounter = 0
+    decisionElapsed.value = 0
     isBusy.value = false
     busyAction.value = null
     currentEvent.value = null
@@ -231,14 +290,17 @@ export function useGameState() {
     stats: readonly(stats),
     timeLeft: readonly(timeLeft),
     gameTimeLeft,
-    actionFeedback: readonly(actionFeedback),
+    actionFeedbackList,
+    actionUseCount,
     isBusy: readonly(isBusy),
     busyAction: readonly(busyAction),
     busyTimeLeft: readonly(busyTimeLeft),
     currentEvent: readonly(currentEvent),
     decisionTimeLeft: readonly(decisionTimeLeft),
+    decisionElapsed: readonly(decisionElapsed),
     ending: readonly(ending),
     handledInterrupts: readonly(handledInterrupts),
+    choiceHistory,
 
     startGame,
     restartGame,
