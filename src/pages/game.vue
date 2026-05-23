@@ -116,7 +116,6 @@ const {
   busyTimeLeft,
   currentEvent,
   decisionTimeLeft,
-  decisionElapsed,
   ending,
   handledInterrupts,
   choiceHistory,
