@@ -164,8 +164,17 @@ export function useGameState() {
     checkInstantDeath()
   }
 
-  function cancelBusyAction() {
+  function cancelBusyAction(partial = false) {
     if (busyTimer) { clearInterval(busyTimer); busyTimer = null }
+    if (partial && busyAction.value) {
+      const action = busyAction.value
+      const elapsed = action.realSeconds - busyTimeLeft.value
+      const ratio = elapsed / action.realSeconds
+      // 折半比例：gain * ratio * 0.5，保留挑战性
+      const partialHealth = Math.round(action.healthGain * ratio * 0.5)
+      const partialStress = Math.round(action.stressDelta * ratio * 0.5)
+      if (partialHealth > 0 || partialStress !== 0) applyDeltas(partialHealth, 0, partialStress)
+    }
     isBusy.value = false
     busyAction.value = null
     busyTimeLeft.value = 0
