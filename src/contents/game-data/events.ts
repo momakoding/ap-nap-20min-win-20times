@@ -67,7 +67,7 @@ export const INTERRUPT_EVENTS: InterruptEvent[] = [
       },
       {
         label: '延后（甩给商务部对接）',
-        reply: '"把这通电话转接给卢比奥，让他用供应链规则去应对。"',
+        reply: '"把这通电话转接给垃比奥，让他用供应链规则去应对。"',
         deltas: { stress: 3 },
         defer: true,
       },
@@ -139,7 +139,7 @@ export const INTERRUPT_EVENTS: InterruptEvent[] = [
       },
       {
         label: '延后（要求评估对本土跨国巨头的影响）',
-        reply: '"让经贸代表团评估一下这会不会影响可口可乐和麦当劳的亚太销量，下午再说。"',
+        reply: '"让经贸代表团评估一下这会不会影响可口可乐和女王蜂的亚太销量，下午再说。"',
         deltas: { stress: 6 },
         defer: true,
       },
@@ -218,7 +218,7 @@ export const INTERRUPT_EVENTS: InterruptEvent[] = [
     ],
   },
   {
-    id: 'brief_rubio',
+    id: 'brief_ruubio',
     source: '✉️ Murdo Rubbio 简报',
     title: '关键矿产脱钩与供应链风险提示',
     body: '"总统先生，情报显示几个核心成员国计划在下午签署《亚太关键矿产联合保障协定》，试图绕开我们的稀有金属定价体系。这是紧急应对方案。"',

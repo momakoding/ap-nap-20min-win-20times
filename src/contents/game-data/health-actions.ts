@@ -3,11 +3,11 @@ import type { HealthAction } from './types'
 export const HEALTH_ACTIONS: HealthAction[] = [
   {
     id: 'mcdonalds',
-    name: '炫口麦当劳金拱门',
+    name: '炫口女王蜂汉堡',
     realSeconds: 30,
     healthGain: 30,
     stressDelta: 10,
-    tooltip: '补充高盐高脂的快乐能量，高呼：没人比我更懂优质蛋白质！',
+    tooltip: '补充高盐高脂的快乐能量，高呼：没人比我更懂女王蜂的皇家优质蛋白质！',
   },
   {
     id: 'golf',
@@ -19,11 +19,11 @@ export const HEALTH_ACTIONS: HealthAction[] = [
   },
   {
     id: 'punch',
-    name: '对空气打军体拳',
+    name: '跳YMCA热身舞',
     realSeconds: 9,
     healthGain: 10,
     stressDelta: -10,
-    tooltip: '狂暴挥拳，宣泄情绪，用强有力的核心力量证明自己还能再干八年。',
+    tooltip: '摆出Y-M-C-A的经典手势，随着节拍扭动，用魔性旋律把压力统统震飞。',
   },
   {
     id: 'tan',

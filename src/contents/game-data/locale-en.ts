@@ -114,7 +114,7 @@ export const EVENT_LOCALE_EN: Record<string, {
       },
       {
         label: 'Defer (assess impact on US multinationals)',
-        reply: '"Have the trade delegation check whether this hits Coke and McDonald\'s Asia-Pacific sales. We\'ll revisit this afternoon."',
+        reply: '"Have the trade delegation check whether this hits Coke and Bugger Queen\'s Asia-Pacific sales. We\'ll revisit this afternoon."',
       },
     ],
   },
@@ -175,7 +175,7 @@ export const EVENT_LOCALE_EN: Record<string, {
       },
     ],
   },
-  brief_rubio: {
+  brief_ruubio: {
     source: '✉️ Murdo Rubbio Briefing',
     title: 'Critical Minerals Decoupling & Supply Chain Risk Alert',
     body: '"Mr. President, intelligence indicates several core member states plan to sign the Asia-Pacific Critical Minerals Joint Guarantee Agreement this afternoon, attempting to bypass our rare-earth pricing system. Here is the emergency response plan."',
@@ -236,16 +236,16 @@ export const EVENT_LOCALE_EN: Record<string, {
 
 export const ACTION_LOCALE_EN: Record<string, { name: string; tooltip: string }> = {
   mcdonalds: {
-    name: "McDonald's Golden Arches Feast",
-    tooltip: 'Fuel up on glorious high-salt, high-fat energy! Nobody knows quality protein better than me!',
+    name: "Bugger Queen's Royal Bee Burger Feast",
+    tooltip: "Fuel up on glorious high-salt, high-fat energy! Nobody knows Bugger Queen's royal quality protein better than me!",
   },
   golf: {
     name: 'Golf Swing Stretch',
     tooltip: 'Shadow-swing in the break room, loosening the lumbar, pretending you\'re on a Florida fairway.',
   },
   punch: {
-    name: 'Air Boxing Workout',
-    tooltip: 'Throw wild punches, vent your rage—prove with raw core power that you can do eight more years.',
+    name: 'YMCA Dance Workout',
+    tooltip: "Strike the Y-M-C-A poses, groove to the beat—let the world's most iconic hand signals shake every drop of stress away.",
   },
   tan: {
     name: 'Bronze Spray Touch-Up',
@@ -294,7 +294,7 @@ export const ENDING_LOCALE_EN = {
     low: '【The Isolated Outcast】Hung up too many times. By afternoon you discovered your seat had been moved to the far edge of the roundtable, right next to the restrooms. Total loss.',
   },
   healthRating: {
-    high: '【The Dynamic Genius (Medical Miracle)】Under tsunami-level political pressure, you somehow maxed out your health on McDonald\'s and Diet Coke. Even the doctors declare you a wellness legend!',
+    high: '【The Dynamic Genius (Medical Miracle)】Under tsunami-level political pressure, you somehow maxed out your health on Bugger Queen\'s and Diet Coke. Even the doctors declare you a wellness legend!',
     mid: '【The Unhealthy Politico with Volatile Blood Pressure】Classic Dump physique. Your brain is still hyper-manic, but your stomach and heart are loudly protesting the high-intensity sparring.',
     low: '【The Burnout on the Couch】Extremely dedicated but completely reckless. You went toe-to-toe with the media too many times—peak pressure blew the critical threshold, and you\'ll participate in the afternoon plenary from the ICU via Twitter.',
   },
